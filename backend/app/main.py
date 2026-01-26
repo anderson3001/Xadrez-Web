@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import chess
 import random 
+from engine.bot import calculate_best_move
 
 app = FastAPI()
 
@@ -12,16 +13,13 @@ def read_root():
     return {"status": "Chess Bot is running!"}
 
 @app.post("/proxima-jogada")
-def get_next_move(request: BoardRequest): #será modificado para fazer 
-    board = chess.Board(request.fen)      #o calculo da melhor jogada por fora
+def get_next_move(request: BoardRequest):
+    best_moviment = calculate_best_move(request.fen)
 
-    if board.is_game_over():
+    if best_moviment is None:
         return {"game_over": True}
 
-    legal_moves = list(board.legal_moves)
-    random_move = random.choice(legal_moves)
-
     return {
-        "best_move": random_move.uci(),
+        "best_move": best_moviment,
         "game_over": False
     }
