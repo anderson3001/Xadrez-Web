@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Chessboard } from 'react-chessboard'
-import { Chess } from 'chess.js'
+import { Chess, type Square } from 'chess.js'
 
 import { RefreshCw, Github, Linkedin, Instagram } from 'lucide-react'
 
@@ -9,6 +9,14 @@ function App() {
   const [status, setStatus] = useState("Sua vez! (Brancas)")
 
   function onDrop(sourceSquare: string, targetSquare: string) {
+    const piece = game.get(sourceSquare as Square);
+    if (
+      piece?.type === 'p' && 
+      ((piece.color === 'w' && targetSquare[1] === '8') || 
+       (piece.color === 'b' && targetSquare[1] === '1'))
+    ) {
+      return false; 
+    }
     try {
       const gameCopy = new Chess(game.fen())
       const move = gameCopy.move({
@@ -30,6 +38,35 @@ function App() {
       return true
     } catch (error) {
       return false
+    }
+  }
+
+  function onPromotionPieceSelect(piece?: string, sourceSquare?: string, targetSquare?: string) {
+    const promotionPiece = piece ? piece[1].toLowerCase() : "q";
+
+    try {
+      const gameCopy = new Chess(game.fen());
+      
+      const move = gameCopy.move({
+        from: sourceSquare!,
+        to: targetSquare!,
+        promotion: promotionPiece,
+      });
+
+      if (!move) return false;
+
+      setGame(gameCopy);
+      
+      if(gameCopy.isGameOver()) {
+        setStatus("Fim de Jogo!")
+      } else {
+        setStatus("Pensando...")
+        setTimeout(() => botPlay(gameCopy.fen()), 250)
+      }
+
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 
@@ -92,6 +129,7 @@ function App() {
             id="BasicBoard"
             position={game.fen()} 
             onPieceDrop={onDrop}
+            onPromotionPieceSelect={onPromotionPieceSelect}
             customBoardStyle={{
               borderRadius: '8px',
               boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
