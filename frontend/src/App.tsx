@@ -108,7 +108,7 @@ function App() {
       
       <header style={styles.header}>
         <div style={styles.logoArea}>
-          <span style={{fontSize: '2rem'}}>♟️</span>
+          <img src="/cavalo.png" alt="ChessBot Logo" style={{width: '50px', height: 'auto', marginRight: '10px'}} />
           <h2 style={{margin: 0, marginLeft: '10px'}}>ChessBot</h2>
         </div>
         
