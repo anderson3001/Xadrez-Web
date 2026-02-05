@@ -119,6 +119,9 @@ function App() {
       if (!move) return false;
 
       setGame(gameCopy);
+
+      setOptionSquares({});
+      setMoveFrom("");
       
       if(gameCopy.isGameOver()) {
         setStatus("Fim de Jogo!")
