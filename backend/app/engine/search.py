@@ -29,3 +29,25 @@ def minimax(board: chess.Board, depth: int, is_maximizing: bool):
             min_eval = min(min_eval, eval)
 
         return min_eval
+    
+def find_best_move(board: chess.Board, depth: int):
+    best_move = None
+    
+    is_maximizing = board.turn == chess.WHITE
+    best_eval = -float('inf') if is_maximizing else float('inf')
+
+    for move in board.legal_moves:
+        board.push(move)
+
+        current_eval = minimax(board, depth - 1, not is_maximizing)
+        board.pop()
+        if is_maximizing:
+            if current_eval > best_eval:
+                best_eval = current_eval
+                best_move = move
+        else:
+            if current_eval < best_eval:
+                best_eval = current_eval
+                best_move = move
+
+    return best_move
