@@ -1,7 +1,7 @@
 import chess
 from app.engine.eval import evaluate_board
 
-def minimax(board: chess.Board, depth: int, is_maximizing: bool):
+def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximizing: bool):
     if depth == 0 or board.is_game_over():
         return evaluate_board(board)
     
@@ -11,10 +11,14 @@ def minimax(board: chess.Board, depth: int, is_maximizing: bool):
         for move in board.legal_moves:
             board.push(move)
 
-            eval = minimax(board, depth - 1, False)
+            eval = minimax(board, depth - 1, alpha, beta, False)
             board.pop()
 
             max_eval = max(max_eval, eval)
+            alpha = max(alpha, eval)
+
+            if beta <= alpha:
+                break
 
         return max_eval
     else:
@@ -23,10 +27,14 @@ def minimax(board: chess.Board, depth: int, is_maximizing: bool):
         for move in board.legal_moves:
             board.push(move)
 
-            eval = minimax(board, depth - 1, True)
+            eval = minimax(board, depth - 1, alpha, beta, True)
             board.pop()
 
             min_eval = min(min_eval, eval)
+            beta = min(beta, eval)
+
+            if beta <= alpha:
+                break
 
         return min_eval
     
@@ -34,20 +42,35 @@ def find_best_move(board: chess.Board, depth: int):
     best_move = None
     
     is_maximizing = board.turn == chess.WHITE
-    best_eval = -float('inf') if is_maximizing else float('inf')
 
-    for move in board.legal_moves:
-        board.push(move)
+    alpha = -float('inf')
+    beta = float('inf')
 
-        current_eval = minimax(board, depth - 1, not is_maximizing)
-        board.pop()
-        if is_maximizing:
-            if current_eval > best_eval:
-                best_eval = current_eval
+    if is_maximizing:
+        best_eval = -float('inf')
+        for move in board.legal_moves:
+            board.push(move)
+
+            eval = minimax(board, depth - 1, alpha, beta, False)
+            board.pop()
+
+            if eval > best_eval:
+                best_eval = eval
                 best_move = move
-        else:
-            if current_eval < best_eval:
-                best_eval = current_eval
+
+            alpha = max(alpha, eval)
+            
+    else:
+        best_eval = float('inf')
+        for move in board.legal_moves:
+            board.push(move)
+            eval = minimax(board, depth - 1, alpha, beta, True)
+            board.pop()
+
+            if eval < best_eval:
+                best_eval = eval
                 best_move = move
+
+            beta = min(beta, eval)
 
     return best_move
