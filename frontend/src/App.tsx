@@ -7,6 +7,66 @@ import { RefreshCw, Github, Linkedin, Instagram } from 'lucide-react'
 function App() {
   const [game, setGame] = useState(new Chess())
   const [status, setStatus] = useState("Sua vez! (Brancas)")
+  const [moveFrom, setMoveFrom] = useState("");
+  const [optionSquares, setOptionSquares] = useState<Record<string, any>>({});
+
+  function getMoveOptions(square: string) {
+    const moves = game.moves({
+      square: square as Square, 
+      verbose: true,
+    });
+
+    if (moves.length === 0) {
+      setOptionSquares({});
+      return false;
+    }
+
+    const newSquares: Record<string, any> = {};
+    
+    moves.map((move) => {
+      const targetPiece = game.get(move.to as Square);
+      const sourcePiece = game.get(square as Square);
+
+      const isCapture = targetPiece && sourcePiece && targetPiece.color !== sourcePiece.color;
+
+      newSquares[move.to] = {
+        background: isCapture
+          ? "radial-gradient(circle, rgba(255,0,0,.5) 85%, transparent 85%)"
+          : "radial-gradient(circle, rgba(0,0,0,.5) 25%, transparent 25%)",
+        borderRadius: "50%",
+      };
+      return move;
+    });
+
+    newSquares[square] = {
+      background: "rgba(255, 255, 0, 0.4)",
+    };
+    
+    setOptionSquares(newSquares);
+    return true;
+  }
+
+  function onSquareClick(square: string) {
+    if (square === moveFrom) {
+      setMoveFrom("");
+      setOptionSquares({});
+      return;
+    }
+    if (optionSquares[square]) {
+      const move = onDrop(moveFrom, square);
+      if (move) {
+        setMoveFrom("");
+        setOptionSquares({});
+        return;
+      }
+    }
+    const hasMoves = getMoveOptions(square);
+    if (hasMoves) {
+      setMoveFrom(square);
+    } else {
+      setMoveFrom(""); 
+    }
+  }
 
   function onDrop(sourceSquare: string, targetSquare: string) {
     const piece = game.get(sourceSquare as Square);
@@ -28,6 +88,9 @@ function App() {
       if (!move) return false
 
       setGame(gameCopy)
+
+      setOptionSquares({}); 
+      setMoveFrom("");
       
       if(gameCopy.isGameOver()) {
         setStatus("Fim de Jogo!")
@@ -129,6 +192,8 @@ function App() {
             id="BasicBoard"
             position={game.fen()} 
             onPieceDrop={onDrop}
+            onSquareClick={onSquareClick}
+            customSquareStyles={optionSquares}
             onPromotionPieceSelect={onPromotionPieceSelect}
             customBoardStyle={{
               borderRadius: '8px',
