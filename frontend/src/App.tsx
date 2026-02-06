@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { Chess, type Square } from 'chess.js'
 import './App.css'
+import Confetti from 'react-confetti'
 
 import { RefreshCw, Github, Linkedin, Instagram } from 'lucide-react'
 
@@ -11,6 +12,7 @@ function App() {
   const [moveFrom, setMoveFrom] = useState("");
   const [optionSquares, setOptionSquares] = useState<Record<string, any>>({});
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
+  const [lastMoveSquares, setLastMoveSquares] = useState<Record<string, any>>({});
 
   function playSound(type: 'move' | 'capture' | 'gameover') {
     const audio = new Audio(`/sounds/${type}.mp3`);
@@ -102,6 +104,11 @@ function App() {
 
       if (!move) return false
 
+      setLastMoveSquares({
+        [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+        [targetSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+      });
+
       if (move.captured) {
         playSound('capture');
       } else {
@@ -171,6 +178,7 @@ function App() {
     setGame(newGame);
     setOptionSquares({});
     setMoveFrom("");
+    setLastMoveSquares({});
     
     if (newColor === 'black') {
       setStatus("Bot pensando na abertura...");
@@ -194,6 +202,11 @@ function App() {
       if (data.best_move) {
         const gameCopy = new Chess(fenAtual)
         const move = gameCopy.move(data.best_move)
+
+        setLastMoveSquares({
+            [move.from]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
+            [move.to]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' }
+        });
 
         if (move && move.captured) {
             playSound('capture')
@@ -229,6 +242,7 @@ function App() {
     setGame(newGame);
     setOptionSquares({});
     setMoveFrom("");
+    setLastMoveSquares({});
     
     if (playerColor === 'black') {
         setStatus("Bot pensando na abertura...");
@@ -237,6 +251,10 @@ function App() {
         setStatus("Sua vez! (Brancas)");
     }
   }
+
+  const isCheckmate = game.isCheckmate()
+  const winnerColor = game.turn() === 'w' ? 'black' : 'white'
+  const playerWon = isCheckmate && winnerColor === playerColor
 
   return (
     <div className="app-container">
@@ -268,6 +286,13 @@ function App() {
       </header>
 
       <main className="main-content">
+        {playerWon && (
+            <Confetti 
+              width={window.innerWidth} 
+              height={window.innerHeight} 
+              recycle={false}
+            />
+        )}
         <div className="status-card">
           {status}
         </div>
@@ -279,7 +304,10 @@ function App() {
             onPieceDrop={onDrop}
             onSquareClick={onSquareClick}
             boardOrientation={playerColor as 'white' | 'black'}
-            customSquareStyles={optionSquares}
+            customSquareStyles={{
+                ...lastMoveSquares,
+                ...optionSquares
+            }}
             onPromotionPieceSelect={onPromotionPieceSelect}
           />
         </div>
