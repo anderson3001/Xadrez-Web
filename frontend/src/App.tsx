@@ -9,6 +9,7 @@ function App() {
   const [status, setStatus] = useState("Sua vez! (Brancas)")
   const [moveFrom, setMoveFrom] = useState("");
   const [optionSquares, setOptionSquares] = useState<Record<string, any>>({});
+  const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
 
   function getMoveOptions(square: string) {
     const moves = game.moves({
@@ -60,16 +61,24 @@ function App() {
         return;
       }
     }
-    const hasMoves = getMoveOptions(square);
-    if (hasMoves) {
-      setMoveFrom(square);
+    const piece = game.get(square as Square);
+
+    if (piece && piece.color === playerColor[0]) {
+        const hasMoves = getMoveOptions(square);
+        if (hasMoves) setMoveFrom(square);
     } else {
-      setMoveFrom(""); 
+        setMoveFrom("");
+        setOptionSquares({});
     }
   }
 
   function onDrop(sourceSquare: string, targetSquare: string) {
     const piece = game.get(sourceSquare as Square);
+
+    if (piece && piece.color !== playerColor[0]) {
+        return false;
+    }
+
     if (
       piece?.type === 'p' && 
       ((piece.color === 'w' && targetSquare[1] === '8') || 
@@ -136,6 +145,25 @@ function App() {
     }
   }
 
+  function toggleOrientation() {
+    const newColor = playerColor === 'white' ? 'black' : 'white';
+    setPlayerColor(newColor);
+    
+    const newGame = new Chess();
+    setGame(newGame);
+    setOptionSquares({});
+    setMoveFrom("");
+    
+    if (newColor === 'black') {
+      setStatus("Bot pensando na abertura...");
+      setTimeout(() => {
+          botPlay(newGame.fen());
+      }, 500);
+    } else {
+      setStatus("Sua vez! (Brancas)");
+    }
+  }
+
   async function botPlay(fenAtual: string) {
     try {
       const response = await fetch('http://localhost:8000/proxima-jogada', {
@@ -165,8 +193,17 @@ function App() {
   }
 
   function resetGame() {
-    setGame(new Chess())
-    setStatus("Sua vez!")
+    const newGame = new Chess();
+    setGame(newGame);
+    setOptionSquares({});
+    setMoveFrom("");
+    
+    if (playerColor === 'black') {
+        setStatus("Bot pensando na abertura...");
+        setTimeout(() => botPlay(newGame.fen()), 500);
+    } else {
+        setStatus("Sua vez! (Brancas)");
+    }
   }
 
   return (
@@ -177,11 +214,17 @@ function App() {
           <img src="/cavalo.png" alt="ChessBot Logo" style={{width: '50px', height: 'auto', marginRight: '10px'}} />
           <h2 style={{margin: 0, marginLeft: '10px'}}>ChessBot</h2>
         </div>
-        
-        <button onClick={resetGame} style={styles.resetButton}>
-          <RefreshCw size={18} style={{marginRight: '8px'}} />
-          Reiniciar Jogo
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+                onClick={toggleOrientation} 
+                style={{...styles.resetButton, backgroundColor: '#6c757d'}}>
+                {playerColor === 'white' ? 'Jogar de Pretas ♟️' : 'Jogar de Brancas ♔'}
+            </button>
+            <button onClick={resetGame} style={styles.resetButton}>
+                <RefreshCw size={18} style={{marginRight: '8px'}} />
+                Reiniciar Jogo
+            </button>
+        </div>
       </header>
 
       <main style={styles.main}>
@@ -196,6 +239,7 @@ function App() {
             position={game.fen()} 
             onPieceDrop={onDrop}
             onSquareClick={onSquareClick}
+            boardOrientation={playerColor}
             customSquareStyles={optionSquares}
             onPromotionPieceSelect={onPromotionPieceSelect}
             customBoardStyle={{
