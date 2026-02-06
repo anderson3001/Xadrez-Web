@@ -2,7 +2,15 @@ import chess
 from app.engine.eval import evaluate_board
 
 def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximizing: bool):
-    if depth == 0 or board.is_game_over():
+    if board.is_game_over():
+        if board.is_checkmate():
+            if board.turn == chess.WHITE:
+                return -100000 - depth 
+            else:
+                return 100000 + depth
+        return evaluate_board(board)
+
+    if depth == 0:
         return evaluate_board(board)
     
     if is_maximizing:
