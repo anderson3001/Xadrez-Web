@@ -109,14 +109,19 @@ function App() {
       }
 
       setGame(gameCopy)
-
       setOptionSquares({}); 
       setMoveFrom("");
       
-      if(gameCopy.isGameOver()) {
-        setStatus("Fim de Jogo!")
-        playSound('gameover')
-      } else {
+      if (gameCopy.isCheckmate()) {
+          const winner = gameCopy.turn() === 'w' ? "Pretas" : "Brancas";
+          setStatus(`Xeque-mate! ${winner} venceram.`);
+          playSound('gameover')
+      }
+      else if (gameCopy.isDraw()) {
+          setStatus("Empate! (Repetição ou Regras)")
+          playSound('gameover')
+      }
+      else {
         setStatus("Pensando...")
         setTimeout(() => botPlay(gameCopy.fen()), 250)
       }
@@ -198,12 +203,20 @@ function App() {
         setGame(gameCopy)
 
         if (gameCopy.isCheckmate()) {
-            setStatus("Xeque-mate! Você perdeu.")
+            const winner = gameCopy.turn() === 'w' ? "Pretas" : "Brancas";
+            setStatus(`Xeque-mate! ${winner} venceram.`);
             playSound('gameover')
         }
-        else if (gameCopy.isDraw()) setStatus("Empate!")
-        else if (gameCopy.isCheck()) setStatus("Cuidado: Xeque!")
-        else setStatus("Sua vez!")
+        else if (gameCopy.isDraw()) {
+            setStatus("Empate! (Repetição ou Regras)")
+            playSound('gameover')
+        }
+        else if (gameCopy.isCheck()) {
+            setStatus("Cuidado: Xeque!")
+        }
+        else {
+            setStatus("Sua vez!")
+        }
       }
     } catch (error) {
       console.error('Erro:', error)
