@@ -111,9 +111,9 @@ def evaluate_board(board: chess.Board):
             pst_bonus = 0
             if table:
                 if piece.color == chess.WHITE:
-                    pst_bonus = table[square]
+                    pst_bonus = table[chess.square_mirror(square)]
                 else:
-                    pst_bonus = -table[chess.square_mirror(square)]
+                    pst_bonus = table[square]
             if piece.color == chess.WHITE:
                 score += (value + pst_bonus)
             else:
