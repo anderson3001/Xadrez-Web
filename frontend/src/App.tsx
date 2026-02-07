@@ -13,6 +13,7 @@ function App() {
   const [optionSquares, setOptionSquares] = useState<Record<string, any>>({});
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
   const [lastMoveSquares, setLastMoveSquares] = useState<Record<string, any>>({});
+  const [difficulty, setDifficulty] = useState("medium")
 
   function playSound(type: 'move' | 'capture' | 'gameover') {
     const audio = new Audio(`/sounds/${type}.mp3`);
@@ -195,7 +196,10 @@ function App() {
       const response = await fetch('http://localhost:8000/proxima-jogada', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fen: fenAtual })
+        body: JSON.stringify({ 
+          fen: fenAtual,
+          difficulty: difficulty
+        })
       })
       const data = await response.json()
 
@@ -266,6 +270,19 @@ function App() {
         </div>
         
         <div className="buttons-area">
+            <div className="controls-area">
+                <label className="difficulty-label">Nível:</label>
+                <select 
+                    className="difficulty-select"
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value)}
+                >
+                    <option value="easy">Fácil</option>
+                    <option value="medium">Médio</option>
+                    <option value="hard">Difícil</option>
+                </select>
+            </div>
+
             <button 
                 onClick={toggleOrientation} 
                 className="action-button"

@@ -21,12 +21,22 @@ app.add_middleware(
 
 class BoardRequest(BaseModel):
     fen: str 
+    difficulty: str = "medium"
+
 @app.get("/")
 def read_root():
     return {"status": "Chess Bot is running!"}
 
 @app.post("/proxima-jogada")
 def get_next_move(request: BoardRequest):
+    difficulty_map = {
+        "easy": 2,
+        "medium": 3,
+        "hard": 4
+    }
+    
+    depth = difficulty_map.get(request.difficulty, 3)
+
     best_moviment = calculate_best_move(request.fen)
 
     if best_moviment is None:
