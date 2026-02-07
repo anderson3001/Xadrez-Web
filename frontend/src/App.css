@@ -11,7 +11,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: linear-gradient(180deg, #1e1e2f, #12121a);
+  background: linear-gradient(180deg, #1e1e2f, #12121a);
   color: white;
   font-family: 'Nunito', sans-serif;
 }
@@ -21,10 +21,11 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background-color: #21252b;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   flex-wrap: wrap;
   gap: 15px;
+  backdrop-filter: blur(8px);
+  background: rgba(33, 37, 43, 0.85);
 }
 
 .logo-area {
@@ -85,7 +86,12 @@ body {
   font-weight: bold;
   font-size: 0.9rem;
   font-family: 'Nunito', sans-serif;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+}
+.action-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  filter: brightness(1.1);
 }
 
 .main-content {
@@ -109,11 +115,13 @@ body {
 }
 
 .board-wrapper {
-  width: 450px;
-  height: 450px;
-  max-width: 90vw;
-  max-height: 90vw;
-  margin: 0 auto;
+  width: min(90vw, 450px);
+  height: min(90vw, 450px);
+  background: rgba(0,0,0,0.25);
+  padding: 15px;
+  border-radius: 16px;
+  box-shadow:  0 30px 80px rgba(0, 0, 0, 0.6),
+  0 0 120px rgba(0, 0, 0, 0.4);
 }
 
 .footer {
@@ -135,7 +143,33 @@ body {
   transition: color 0.2s;
   text-decoration: none;
 }
+.social-link:hover {
+  color: #4a90e2;
+  transform: scale(1.1);
+}
 
+@media (max-width: 800px) {
+  .buttons-area {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .controls-area {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+}
+@media (max-width: 720px) {
+  .buttons-area {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-button {
+    width: 100%;
+  }
+}
 
 @media (max-width: 600px) {
   .header {
@@ -145,19 +179,14 @@ body {
 
   .controls-area {
     width: 100%;
-    justify-content: center;
-    margin-right: 0;
-    margin-bottom: 10px;
   }
 
   .buttons-area {
-    width: 100%;
-    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .action-button {
-    flex: 1;
-    font-size: 0.8rem;
-    padding: 10px;
+    width: 100%;
   }
 }
