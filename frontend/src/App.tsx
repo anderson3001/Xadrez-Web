@@ -69,7 +69,7 @@ function App() {
       return
     }
     if (optionSquares[square]) {
-      const move = onDrop(moveFrom, square)
+      const move = onDrop(moveFrom, square, true)
       if (move) {
         setMoveFrom('')
         setOptionSquares({})
@@ -87,20 +87,14 @@ function App() {
     }
   }
 
-  function onDrop(sourceSquare: string, targetSquare: string) {
+  function onDrop(sourceSquare: string, targetSquare: string, isClick = false) {
     const piece = game.get(sourceSquare as Square)
 
     if (piece && piece.color !== playerColor[0]) {
       return false
     }
 
-    if (
-      piece?.type === 'p' &&
-      ((piece.color === 'w' && targetSquare[1] === '8') ||
-        (piece.color === 'b' && targetSquare[1] === '1'))
-    ) {
-      return false
-    }
+    
     try {
       const gameCopy = new Chess()
       gameCopy.loadPgn(game.pgn())
@@ -111,6 +105,17 @@ function App() {
       })
 
       if (!move) return false
+
+      const isPromotion =
+        piece?.type === 'p' &&
+        ((piece.color === 'w' && targetSquare[1] === '8') ||
+         (piece.color === 'b' && targetSquare[1] === '1'))
+
+      if (isPromotion) {
+        if (!isClick) {
+          return true
+        }
+      }
 
       setLastMoveSquares({
         [sourceSquare]: { backgroundColor: 'rgba(255, 255, 0, 0.4)' },
@@ -371,7 +376,7 @@ function App() {
             <Chessboard
               id="BasicBoard"
               position={game.fen()}
-              onPieceDrop={onDrop}
+              onPieceDrop={(source, target) => onDrop(source, target, false)}
               onSquareClick={onSquareClick}
               boardOrientation={playerColor}
               arePiecesDraggable={!status.includes('Pensando')}
