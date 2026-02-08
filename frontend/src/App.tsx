@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Chessboard } from 'react-chessboard'
 import { Chess, type Square } from 'chess.js'
 import './App.css'
@@ -15,6 +15,8 @@ function App() {
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
   const [lastMoveSquares, setLastMoveSquares] = useState<Record<string, any>>({});
   const [difficulty, setDifficulty] = useState("medium")
+
+  const gameRef = useRef(0);
 
   function playSound(type: 'move' | 'capture' | 'gameover') {
     const audio = new Audio(`/sounds/${type}.mp3`);
@@ -173,6 +175,7 @@ function App() {
   }
 
   function toggleOrientation() {
+    gameRef.current += 1;
     const newColor = playerColor === 'white' ? 'black' : 'white';
     setPlayerColor(newColor);
     
@@ -193,6 +196,7 @@ function App() {
   }
 
   async function botPlay(fenAtual: string) {
+    const currentId = gameRef.current;
     try {
       const response = await fetch('http://localhost:8000/proxima-jogada', {
         method: 'POST',
@@ -203,6 +207,8 @@ function App() {
         })
       })
       const data = await response.json()
+
+      if (currentId !== gameRef.current) return;
 
       if (data.best_move) {
         const gameCopy = new Chess(fenAtual)
@@ -243,6 +249,7 @@ function App() {
   }
 
   function resetGame() {
+    gameRef.current += 1;
     const newGame = new Chess();
     setGame(newGame);
     setOptionSquares({});
@@ -324,6 +331,7 @@ function App() {
             onPieceDrop={onDrop}
             onSquareClick={onSquareClick}
             boardOrientation={playerColor as 'white' | 'black'}
+            arePiecesDraggable={!status.includes("Pensando")}
             customSquareStyles={{
                 ...lastMoveSquares,
                 ...optionSquares
