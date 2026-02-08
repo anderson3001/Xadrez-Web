@@ -99,7 +99,8 @@ function App() {
       return false; 
     }
     try {
-      const gameCopy = new Chess(game.fen())
+      const gameCopy = new Chess();
+      gameCopy.loadPgn(game.pgn())
       const move = gameCopy.move({
         from: sourceSquare,
         to: targetSquare,
@@ -134,7 +135,7 @@ function App() {
       }
       else {
         setStatus("Pensando...")
-        setTimeout(() => botPlay(gameCopy.fen()), 250)
+        setTimeout(() => botPlay(gameCopy.fen(), gameCopy.pgn()), 250)
       }
       return true
     } catch (error) {
@@ -146,7 +147,8 @@ function App() {
     const promotionPiece = piece ? piece[1].toLowerCase() : "q";
 
     try {
-      const gameCopy = new Chess(game.fen());
+      const gameCopy = new Chess()
+      gameCopy.loadPgn(game.pgn())
       
       const move = gameCopy.move({
         from: sourceSquare!,
@@ -165,7 +167,7 @@ function App() {
         setStatus("Fim de Jogo!")
       } else {
         setStatus("Pensando...")
-        setTimeout(() => botPlay(gameCopy.fen()), 250)
+        setTimeout(() => botPlay(gameCopy.fen(), gameCopy.pgn()), 250)
       }
 
       return true;
@@ -188,14 +190,14 @@ function App() {
     if (newColor === 'black') {
       setStatus("Bot pensando na abertura...");
       setTimeout(() => {
-          botPlay(newGame.fen());
+          botPlay(newGame.fen(), newGame.pgn());
       }, 500);
     } else {
       setStatus("Sua vez! (Brancas)");
     }
   }
 
-  async function botPlay(fenAtual: string) {
+  async function botPlay(fenAtual: string, pgnAtual: string) {
     const currentId = gameRef.current;
     try {
       const response = await fetch('http://localhost:8000/proxima-jogada', {
@@ -211,7 +213,8 @@ function App() {
       if (currentId !== gameRef.current) return;
 
       if (data.best_move) {
-        const gameCopy = new Chess(fenAtual)
+        const gameCopy = new Chess();
+        gameCopy.loadPgn(pgnAtual)
         const move = gameCopy.move(data.best_move)
 
         setLastMoveSquares({
@@ -248,6 +251,29 @@ function App() {
     }
   }
 
+function undoMove() {
+    setLastMoveSquares({});
+
+    const gameCopy = new Chess();
+    gameCopy.loadPgn(game.pgn());
+
+    const move = gameCopy.undo();
+
+    if (!move) return;
+
+    const myColorShort = playerColor === 'white' ? 'w' : 'b';
+
+    if (gameCopy.turn() !== myColorShort) {
+        gameCopy.undo();
+    }
+
+    setGame(gameCopy);
+    setOptionSquares({});
+
+    gameRef.current += 1;
+    setStatus("Sua vez!");
+}
+
   function resetGame() {
     gameRef.current += 1;
     const newGame = new Chess();
@@ -258,7 +284,7 @@ function App() {
     
     if (playerColor === 'black') {
         setStatus("Bot pensando na abertura...");
-        setTimeout(() => botPlay(newGame.fen()), 500);
+        setTimeout(() => botPlay(newGame.fen(), newGame.pgn()), 500);
     } else {
         setStatus("Sua vez! (Brancas)");
     }
@@ -269,98 +295,130 @@ function App() {
   const playerWon = isCheckmate && winnerColor === playerColor
 
   return (
-    <div className="app-container">
-      
-      <header className="header">
-        <div className="logo-area">
-          <img src="/cavalo.png" alt="ChessBot Logo" style={{width: '40px', height: 'auto', marginRight: '10px'}} />
-          <h2 style={{margin: 0}}>ChessBot</h2>
-        </div>
-        
-        <div className="buttons-area">
-            <div className="controls-area">
-                <label className="difficulty-label">Nível:</label>
-                <select 
-                    className="difficulty-select"
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
-                >
-                    <option value="easy">Fácil</option>
-                    <option value="medium">Médio</option>
-                    <option value="hard">Difícil</option>
-                </select>
-            </div>
+  <div className="app-container">
+    
+    <header className="header">
+      <div className="logo-area">
+        <img
+          src="/cavalo.png"
+          alt="ChessBot Logo"
+          style={{ width: '40px', height: 'auto', marginRight: '10px' }}
+        />
+        <h2 style={{ margin: 0 }}>ChessBot</h2>
+      </div>
 
-            <button 
-                onClick={toggleOrientation} 
-                className="action-button"
-                style={{backgroundColor: '#6c757d'}}
-            >
-                {playerColor === 'white' ? 'Jogar de Pretas ♟️' : 'Jogar de Brancas ♔'}
-            </button>
-
-            <button 
-                onClick={resetGame} 
-                className="action-button"
-                style={{backgroundColor: '#4a90e2'}}
-            >
-                <RefreshCw size={18} style={{marginRight: '8px'}} />
-                Reiniciar
-            </button>
+      <div className="buttons-area">
+        <div className="controls-area">
+          <label className="difficulty-label">Nível:</label>
+          <select
+            className="difficulty-select"
+            value={difficulty}
+            onChange={(e) => setDifficulty(e.target.value)}
+          >
+            <option value="easy">Fácil</option>
+            <option value="medium">Médio</option>
+            <option value="hard">Difícil</option>
+          </select>
         </div>
-      </header>
 
-      <main className="main-content">
-        {playerWon && (
-            <Confetti 
-              width={window.innerWidth} 
-              height={window.innerHeight} 
-              recycle={false}
-            />
-        )}
-        <div className="status-card">
-          {status}
-        </div>
-        <div style={{width: '100%', maxWidth: '400px', marginBottom: '5px'}}>
-          <CapturedPieces game={game} color="w" /> 
+        <button
+          onClick={toggleOrientation}
+          className="action-button"
+          style={{ backgroundColor: '#6c757d' }}
+        >
+          {playerColor === 'white'
+            ? 'Jogar de Pretas ♟️'
+            : 'Jogar de Brancas ♔'}
+        </button>
+
+        <button
+          onClick={resetGame}
+          className="action-button"
+          style={{ backgroundColor: '#4a90e2' }}
+        >
+          <RefreshCw size={18} style={{ marginRight: '8px' }} />
+          Reiniciar
+        </button>
+      </div>
+    </header>
+
+    <main className="main-content">
+      {playerWon && (
+        <Confetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+        />
+      )}
+
+      <div className="status-card">{status}</div>
+
+      <div className="board-area">
+
+        <div className="board-top-bar">
+          <CapturedPieces game={game} color="w" />
+
+          <button
+            onClick={undoMove}
+            className="toolbar-btn"
+            disabled={game.history().length === 0}
+          >
+            ↩ Desfazer
+          </button>
         </div>
         <div className="board-wrapper">
-          <Chessboard 
+          <Chessboard
             id="BasicBoard"
-            position={game.fen()} 
+            position={game.fen()}
             onPieceDrop={onDrop}
             onSquareClick={onSquareClick}
-            boardOrientation={playerColor as 'white' | 'black'}
-            arePiecesDraggable={!status.includes("Pensando")}
+            boardOrientation={playerColor}
+            arePiecesDraggable={!status.includes('Pensando')}
             customSquareStyles={{
-                ...lastMoveSquares,
-                ...optionSquares
+              ...lastMoveSquares,
+              ...optionSquares,
             }}
             onPromotionPieceSelect={onPromotionPieceSelect}
           />
         </div>
-        <div style={{width: '100%', maxWidth: '400px', marginTop: '5px'}}>
+        <div className="board-bottom-bar">
           <CapturedPieces game={game} color="b" />
         </div>
-      </main>
+      </div>
+    </main>
 
-      <footer className="footer">
-        <p>Desenvolvido por <strong>Anderson Gomes</strong></p>
-        <div className="social-links">
-          <a href="https://github.com/anderson3001" target="_blank" className="social-link">
-            <Github size={24} />
-          </a>
-          <a href="https://linkedin.com/in/andersonsgomes" target="_blank" className="social-link">
-            <Linkedin size={24} />
-          </a>
-          <a href="https://instagram.com/andersonn_sgomes" target="_blank" className="social-link">
-            <Instagram size={24} />
-          </a>
-        </div>
-      </footer>
+    <footer className="footer">
+      <p>
+        Desenvolvido por <strong>Anderson Gomes</strong>
+      </p>
 
-    </div>
-  );
+      <div className="social-links">
+        <a
+          href="https://github.com/anderson3001"
+          target="_blank"
+          className="social-link"
+        >
+          <Github size={24} />
+        </a>
+        <a
+          href="https://linkedin.com/in/andersonsgomes"
+          target="_blank"
+          className="social-link"
+        >
+          <Linkedin size={24} />
+        </a>
+        <a
+          href="https://instagram.com/andersonn_sgomes"
+          target="_blank"
+          className="social-link"
+        >
+          <Instagram size={24} />
+        </a>
+      </div>
+    </footer>
+  </div>
+);
+
 }
 
 export default App;
