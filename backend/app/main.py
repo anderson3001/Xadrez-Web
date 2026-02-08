@@ -30,14 +30,14 @@ def read_root():
 @app.post("/proxima-jogada")
 def get_next_move(request: BoardRequest):
     difficulty_map = {
-        "easy": 2,
+        "easy": 1,
         "medium": 3,
         "hard": 4
     }
-    
+
     depth = difficulty_map.get(request.difficulty, 3)
 
-    best_moviment = calculate_best_move(request.fen)
+    best_moviment = calculate_best_move(request.fen, depth=depth)
 
     if best_moviment is None:
         return {"game_over": True}
