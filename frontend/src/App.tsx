@@ -315,7 +315,7 @@ function App() {
           {status}
         </div>
         <div style={{width: '100%', maxWidth: '400px', marginBottom: '5px'}}>
-          <CapturedPieces game={game} color="b" /> 
+          <CapturedPieces game={game} color="w" /> 
         </div>
         <div className="board-wrapper">
           <Chessboard 
@@ -332,7 +332,7 @@ function App() {
           />
         </div>
         <div style={{width: '100%', maxWidth: '400px', marginTop: '5px'}}>
-          <CapturedPieces game={game} color="w" />
+          <CapturedPieces game={game} color="b" />
         </div>
       </main>
 
