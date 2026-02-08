@@ -6,7 +6,7 @@ from app.engine.search import find_best_move
 def calculate_best_move(fen: str, depth: int = 3):
     board = chess.Board(fen)
 
-    if depth > 1:
+    if depth > 2:
         try:
             with chess.polyglot.open_reader("app/engine/gm2001.bin") as reader:
                 entry = reader.weighted_choice(board)     
