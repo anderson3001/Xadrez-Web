@@ -204,8 +204,9 @@ function App() {
 
   async function botPlay(fenAtual: string, pgnAtual: string) {
     const currentId = gameRef.current
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
     try {
-      const response = await fetch('http://localhost:8000/proxima-jogada', {
+      const response = await fetch(`${API_URL}/proxima-jogada`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
