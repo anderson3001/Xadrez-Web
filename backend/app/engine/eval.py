@@ -6,7 +6,7 @@ PIECE_VALUES = {
     chess.BISHOP: 330,
     chess.ROOK: 500,
     chess.QUEEN: 900,
-    chess.KING: 20000
+    chess.KING: 20000,
 }
 
 PAWN_TABLE = [
@@ -75,13 +75,14 @@ KING_TABLE = [
      20, 30, 10,  0,  0, 10, 30, 20
 ]
 
+
 def evaluate_board(board: chess.Board):
     if board.is_checkmate():
         if board.turn == chess.WHITE:
             return -99999
         else:
             return 99999
-    
+
     if board.is_game_over():
         return 0
 
@@ -89,7 +90,7 @@ def evaluate_board(board: chess.Board):
 
     for square in chess.SQUARES:
         piece = board.piece_at(square)
-        
+
         if piece:
             value = PIECE_VALUES.get(piece.piece_type, 0)
 
@@ -115,8 +116,8 @@ def evaluate_board(board: chess.Board):
                 else:
                     pst_bonus = table[square]
             if piece.color == chess.WHITE:
-                score += (value + pst_bonus)
+                score += value + pst_bonus
             else:
-                score -= (value + pst_bonus)
-                
+                score -= value + pst_bonus
+
     return score

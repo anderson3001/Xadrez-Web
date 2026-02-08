@@ -7,8 +7,9 @@ piece_values = {
     chess.BISHOP: 3,
     chess.ROOK: 5,
     chess.QUEEN: 9,
-    chess.KING: 0
+    chess.KING: 0,
 }
+
 
 def move_score(board, move):
     if board.is_capture(move):
@@ -21,29 +22,32 @@ def move_score(board, move):
             victim_value = 1
         else:
             return 0
-        
+
         aggressor_value = piece_values[aggressor_piece.piece_type]
 
         return 100 + victim_value - (aggressor_value / 100)
     return 0
 
-def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximizing: bool):
+
+def minimax(
+    board: chess.Board, depth: int, alpha: float, beta: float, is_maximizing: bool
+):
     if board.is_game_over():
         if board.is_checkmate():
             if board.turn == chess.WHITE:
-                return -100000 - depth 
+                return -100000 - depth
             else:
                 return 100000 + depth
         return evaluate_board(board)
 
     if depth == 0:
         return evaluate_board(board)
-    
+
     ordered_moves = list(board.legal_moves)
     ordered_moves.sort(key=lambda m: move_score(board, m), reverse=True)
-    
+
     if is_maximizing:
-        max_eval = -float('inf')
+        max_eval = -float("inf")
 
         for move in ordered_moves:
             board.push(move)
@@ -59,7 +63,7 @@ def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximi
 
         return max_eval
     else:
-        min_eval = float('inf')
+        min_eval = float("inf")
 
         for move in ordered_moves:
             board.push(move)
@@ -74,20 +78,21 @@ def minimax(board: chess.Board, depth: int, alpha: float, beta: float, is_maximi
                 break
 
         return min_eval
-    
+
+
 def find_best_move(board: chess.Board, depth: int):
     best_move = None
-    
+
     is_maximizing = board.turn == chess.WHITE
 
-    alpha = -float('inf')
-    beta = float('inf')
+    alpha = -float("inf")
+    beta = float("inf")
 
     ordered_moves = list(board.legal_moves)
     ordered_moves.sort(key=lambda m: move_score(board, m), reverse=True)
 
     if is_maximizing:
-        best_eval = -float('inf')
+        best_eval = -float("inf")
         for move in ordered_moves:
             board.push(move)
 
@@ -99,9 +104,9 @@ def find_best_move(board: chess.Board, depth: int):
                 best_move = move
 
             alpha = max(alpha, eval)
-            
+
     else:
-        best_eval = float('inf')
+        best_eval = float("inf")
         for move in ordered_moves:
             board.push(move)
             eval = minimax(board, depth - 1, alpha, beta, True)
