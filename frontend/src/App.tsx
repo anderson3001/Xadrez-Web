@@ -3,6 +3,7 @@ import { Chessboard } from 'react-chessboard'
 import { Chess, type Square } from 'chess.js'
 import './App.css'
 import Confetti from 'react-confetti'
+import { CapturedPieces } from './CapturedPieces'
 
 import { RefreshCw, Github, Linkedin, Instagram } from 'lucide-react'
 
@@ -313,7 +314,9 @@ function App() {
         <div className="status-card">
           {status}
         </div>
-
+        <div style={{width: '100%', maxWidth: '400px', marginBottom: '5px'}}>
+          <CapturedPieces game={game} color="b" /> 
+        </div>
         <div className="board-wrapper">
           <Chessboard 
             id="BasicBoard"
@@ -327,6 +330,9 @@ function App() {
             }}
             onPromotionPieceSelect={onPromotionPieceSelect}
           />
+        </div>
+        <div style={{width: '100%', maxWidth: '400px', marginTop: '5px'}}>
+          <CapturedPieces game={game} color="w" />
         </div>
       </main>
 
