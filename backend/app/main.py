@@ -23,7 +23,7 @@ class BoardRequest(BaseModel):
     fen: str 
     difficulty: str = "medium"
 
-@app.get("/")
+@app.get("/", methods=["GET", "HEAD"])
 def read_root():
     return {"status": "Chess Bot is running!"}
 
