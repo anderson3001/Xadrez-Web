@@ -279,7 +279,12 @@ function App() {
     setOptionSquares({})
 
     gameRef.current += 1
-    setStatus('Sua vez!')
+    if (gameCopy.turn() !== myColorShort) {
+      setStatus('Bot pensando...')
+      setTimeout(() => botPlay(gameCopy.fen(), gameCopy.pgn()), 500)
+    } else {
+      setStatus('Sua vez!')
+    } 
   }
 
   function resetGame() {
