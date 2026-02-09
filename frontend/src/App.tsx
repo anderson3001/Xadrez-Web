@@ -362,7 +362,7 @@ function App() {
 
         <div className="board-area">
           <div className="board-top-bar">
-            <CapturedPieces game={game} color="w" />
+            <CapturedPieces game={game} color={playercolor === 'white' ? 'w' : 'b'} />
 
             <button
               onClick={undoMove}
@@ -388,7 +388,7 @@ function App() {
             />
           </div>
           <div className="board-bottom-bar">
-            <CapturedPieces game={game} color="b" />
+            <CapturedPieces game={game} color={playercolor === 'white' ? 'b' : 'w'} />
           </div>
         </div>
       </main>
