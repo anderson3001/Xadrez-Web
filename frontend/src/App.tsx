@@ -385,6 +385,7 @@ function App() {
               onSquareClick={onSquareClick}
               boardOrientation={playerColor}
               arePiecesDraggable={!status.includes('Pensando')}
+              onPieceDragBegin={() => setOptionSquares({})}
               customSquareStyles={{
                 ...lastMoveSquares,
                 ...optionSquares,
